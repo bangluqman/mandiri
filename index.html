@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>MANDIRI - Manajemen Dokumen Digital</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+body { background:#f4f6fb; }
+
+.hero {
+  background: linear-gradient(135deg,#0d6efd,#6ea8fe);
+  color:white;
+  padding:50px 20px;
+}
+
+.card-modern {
+  border:none;
+  border-radius:14px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+.pointer { cursor:pointer; }
+mark { background:#ffe066; }
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-dark bg-primary px-3 shadow">
+  <span class="navbar-brand fw-bold">
+    📂 MANDIRI
+  </span>
+
+  <div>
+    <span id="statusBadge" class="badge bg-warning">Statis</span>
+    <button id="refreshBtn" class="btn btn-light btn-sm ms-2">
+      <i class="bi bi-arrow-clockwise"></i>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero text-center">
+  <h2 class="fw-bold">Manajemen Dokumen Digital Terintegrasi</h2>
+
+  <div class="row mt-4 g-3">
+    <div class="col-md-4">
+      <div class="card-modern p-3 bg-white text-dark">
+        <i class="bi bi-files fs-3"></i>
+        <h6>Total Dokumen</h6>
+        <h4 id="statTotal">0</h4>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card-modern p-3 bg-white text-dark">
+        <i class="bi bi-file-earmark-check fs-3"></i>
+        <h6>Ada File</h6>
+        <h4 id="statFile">0</h4>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card-modern p-3 bg-white text-dark">
+        <i class="bi bi-calendar-event fs-3"></i>
+        <h6>Tahun Terbaru</h6>
+        <h4 id="statYear">-</h4>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-4">
+
+<!-- SEARCH -->
+<div class="input-group mb-3">
+  <span class="input-group-text"><i class="bi bi-search"></i></span>
+  <input id="searchInput" class="form-control" placeholder="Cari dokumen...">
+  <button id="clearSearch" class="btn btn-outline-secondary">X</button>
+
+  <select id="filterFile" class="form-select" style="max-width:200px">
+    <option value="all">Semua</option>
+    <option value="with">Ada File</option>
+    <option value="without">Tanpa File</option>
+  </select>
+</div>
+
+<table class="table table-bordered table-hover table-striped">
+<thead>
+<tr>
+<th>No</th>
+<th class="pointer" id="sortDate">Tanggal ⬍</th>
+<th class="pointer" id="sortName">Nama Dokumen ⬍</th>
+<th>File</th>
+<th>Aksi</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+
+<!-- PAGINATION -->
+<div class="d-flex justify-content-between align-items-center">
+  <select id="rowsPerPage" class="form-select w-auto">
+    <option>10</option>
+    <option>25</option>
+    <option>50</option>
+    <option>All</option>
+  </select>
+
+  <ul class="pagination mb-0" id="pagination"></ul>
+</div>
+
+</div>
+
+<script>
+const SHEET_ID="1Srk6aObn5XtkzTnl-VNvjG6x6mDdqS4ryrA_YsRHn18";
+const EMAIL="ahmadkholid425@gmail.com";
+
+let data=[], filtered=[];
+let currentPage=1;
+let sortField="date", sortAsc=false;
+
+/* FORMAT TANGGAL (FIX UTAMA) */
+function formatDate(val){
+  if(!val) return "";
+
+  // format Date(2023,10,2)
+  if(typeof val==="string" && val.includes("Date(")){
+    const m = val.match(/Date\((\d+),(\d+),(\d+)\)/);
+    if(m){
+      const d = new Date(m[1], m[2], m[3]);
+      return d.toLocaleDateString("id-ID");
+    }
+  }
+
+  // jika sudah string normal
+  return val;
+}
+
+/* LOAD */
+function loadData(){
+  const s=document.createElement("script");
+  s.src=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:cb`;
+  document.body.appendChild(s);
+}
+
+/* CALLBACK */
+function cb(res){
+  try{
+    const cols=res.table.cols.map(c=>c.label.toLowerCase());
+    const rows=res.table.rows;
+
+    data = rows.map(r=>{
+      const obj={};
+      cols.forEach((col,i)=> obj[col]=r.c[i]?.v || "");
+
+      return {
+        id: obj.id,
+        date: formatDate(obj.tanggal),
+        act: obj.aktivitas,
+        email: obj.email?.toLowerCase().trim(),
+        fileUrl: obj.fileurl
+      };
+    }).filter(x=>x.email===EMAIL);
+
+    statusBadge.className="badge bg-success";
+    statusBadge.innerText="Live";
+
+  }catch{
+    data=[];
+  }
+
+  applyFilter();
+}
+
+/* FILTER */
+function applyFilter(){
+  const q=searchInput.value.toLowerCase();
+  const f=filterFile.value;
+
+  filtered=data.filter(d=>{
+    let ok=d.act.toLowerCase().includes(q);
+    if(f==="with") ok=ok && d.fileUrl;
+    if(f==="without") ok=ok && !d.fileUrl;
+    return ok;
+  });
+
+  sortData();
+}
+
+/* SORT */
+function parseDate(d){
+  const parts=d.split("/");
+  return new Date(parts[2],parts[1]-1,parts[0]);
+}
+
+function sortData(){
+  filtered.sort((a,b)=>{
+    let r = sortField==="date"
+      ? parseDate(a.date)-parseDate(b.date)
+      : a.act.localeCompare(b.act);
+    return sortAsc?r:-r;
+  });
+  render();
+}
+
+/* RENDER */
+function render(){
+  let perPage = rowsPerPage.value==="All"?filtered.length:parseInt(rowsPerPage.value);
+  let start = (currentPage-1)*perPage;
+  let pageData = filtered.slice(start,start+perPage);
+
+  tableBody.innerHTML="";
+
+  pageData.forEach((d,i)=>{
+    tableBody.innerHTML+=`
+<tr>
+<td>${start+i+1}</td>
+<td>${d.date}</td>
+<td>${highlight(d.act)}</td>
+<td>${d.fileUrl?'<span class="badge bg-success">PDF</span>':'<span class="badge bg-secondary">Tidak Ada</span>'}</td>
+<td><a href="${d.fileUrl}" target="_blank" class="btn btn-sm btn-primary">Buka</a></td>
+</tr>`;
+  });
+
+  renderPagination(perPage);
+  updateStats();
+}
+
+/* PAGINATION */
+function renderPagination(perPage){
+  const total=Math.ceil(filtered.length/perPage);
+  pagination.innerHTML="";
+  for(let i=1;i<=total;i++){
+    pagination.innerHTML+=`
+<li class="page-item ${i===currentPage?'active':''}">
+<a class="page-link" href="#" onclick="goPage(${i})">${i}</a>
+</li>`;
+  }
+}
+function goPage(p){ currentPage=p; render(); }
+
+/* STATS */
+function updateStats(){
+  statTotal.innerText=filtered.length;
+  statFile.innerText=filtered.filter(x=>x.fileUrl).length;
+  statYear.innerText=Math.max(...filtered.map(x=>parseDate(x.date).getFullYear()));
+}
+
+/* SEARCH */
+function highlight(text){
+  const q=searchInput.value;
+  if(!q) return text;
+  return text.replace(new RegExp(q,'gi'),m=>`<mark>${m}</mark>`);
+}
+
+/* EVENTS */
+searchInput.oninput=()=>{currentPage=1;applyFilter();}
+filterFile.onchange=applyFilter;
+rowsPerPage.onchange=()=>{currentPage=1;render();}
+
+sortDate.onclick=()=>{sortField="date";sortAsc=!sortAsc;sortData();}
+sortName.onclick=()=>{sortField="act";sortAsc=!sortAsc;sortData();}
+
+clearSearch.onclick=()=>{searchInput.value="";applyFilter();}
+refreshBtn.onclick=()=>location.reload();
+
+/* INIT */
+loadData();
+</script>
+
+</body>
+</html>
