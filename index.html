@@ -25,18 +25,23 @@ body { background:#f4f6fb; }
 }
 
 .pointer { cursor:pointer; }
-mark { background:#ffe066; }
+mark { background:#ffe066; padding:0; }
 
-/* FIX pagination */
+/* Paginasi responsif */
 .pagination {
   flex-wrap: wrap;
-  max-width: 100%;
+  justify-content: center;
+}
+
+.pagination .page-item {
+  margin: 2px 0;
 }
 </style>
 </head>
 
 <body>
 
+<!-- NAVBAR -->
 <nav class="navbar navbar-dark bg-primary px-3 shadow">
   <span class="navbar-brand fw-bold">📂 MANDIRI</span>
   <div>
@@ -47,6 +52,7 @@ mark { background:#ffe066; }
   </div>
 </nav>
 
+<!-- HERO -->
 <div class="hero text-center">
   <h2 class="fw-bold">Manajemen Dokumen Digital Terintegrasi</h2>
 
@@ -75,60 +81,72 @@ mark { background:#ffe066; }
   </div>
 </div>
 
-<div class="container mt-4"><!-- ✅ SPOILER FIX -->
+<div class="container mt-4">
+
+<!-- DOKUMEN INTI (SPOILER) -->
 <div class="accordion mb-4" id="accordionDokumenInti">
   <div class="accordion-item card-modern">
-
-    <h2 class="accordion-header" id="headingOne">
-      <button class="accordion-button collapsed"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#collapseOne"
-        aria-expanded="false"
-        aria-controls="collapseOne">
-
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#dokumenInti">
         <i class="bi bi-folder2-open me-2"></i> Dokumen Inti
       </button>
     </h2>
-
-    <div id="collapseOne"
-         class="accordion-collapse collapse"
-         aria-labelledby="headingOne"
-         data-bs-parent="#accordionDokumenInti">
-
+    <div id="dokumenInti" class="accordion-collapse collapse">
       <div class="accordion-body">
 
-        <table class="table table-bordered">
-          <tr>
-            <td>Statuta UYP</td>
-            <td><a href="https://drive.google.com/open?id=1pJ69MsoiExWVKeMp76RVVrbbdT7SNLZ5" target="_blank">Download</a></td>
-          </tr>
-          <tr>
-            <td>RIP UYP</td>
-            <td><a href="https://drive.google.com/open?id=1WwXODR2MLMd5TKxPQWHAm3IUMm9qYeVc" target="_blank">Download</a></td>
-          </tr>
-          <tr>
-            <td>RENSTRA</td>
-            <td><a href="https://drive.google.com/open?id=1qIJ69q_SPOh4QruvoHfRwF45dJR2nduM" target="_blank">Download</a></td>
-          </tr>
-          <tr>
-            <td>RENOP</td>
-            <td><a href="https://drive.google.com/open?id=19LkmmtBwunMR7PE4iO7EHKSw1l6syl6i" target="_blank">Download</a></td>
-          </tr>
+        <table class="table table-bordered table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Nama Dokumen</th>
+              <th style="width:150px;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Statuta UYP</td>
+              <td>
+                <a href="https://drive.google.com/open?id=1pJ69MsoiExWVKeMp76RVVrbbdT7SNLZ5&usp=drive_copy" target="_blank" class="btn btn-sm btn-success">
+                  <i class="bi bi-download"></i> Download
+                </a>
+              </td>
+            </tr>
+
+            <tr>
+              <td>Rencana Induk Pengembangan (RIP) UYP 2015-2039</td>
+              <td>
+                <a href="https://drive.google.com/open?id=1WwXODR2MLMd5TKxPQWHAm3IUMm9qYeVc&usp=drive_copy" target="_blank" class="btn btn-sm btn-success">
+                  <i class="bi bi-download"></i> Download
+                </a>
+              </td>
+            </tr>
+
+            <tr>
+              <td>Rencana Strategis (RENSTRA) UYP 2025-2029</td>
+              <td>
+                <a href="https://drive.google.com/open?id=1qIJ69q_SPOh4QruvoHfRwF45dJR2nduM&usp=drive_copy" target="_blank" class="btn btn-sm btn-success">
+                  <i class="bi bi-download"></i> Download
+                </a>
+              </td>
+            </tr>
+
+            <tr>
+              <td>Rencana Operasional (RENOP) UYP 2025-2029</td>
+              <td>
+                <a href="https://drive.google.com/open?id=19LkmmtBwunMR7PE4iO7EHKSw1l6syl6i&usp=drive_copy" target="_blank" class="btn btn-sm btn-success">
+                  <i class="bi bi-download"></i> Download
+                </a>
+              </td>
+            </tr>
+
+          </tbody>
         </table>
 
       </div>
     </div>
-
   </div>
 </div>
 
-</div>
-
-<!-- ✅ WAJIB ADA -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-  
+<!-- SEARCH -->
 <div class="input-group mb-3">
   <span class="input-group-text"><i class="bi bi-search"></i></span>
   <input id="searchInput" class="form-control" placeholder="Cari dokumen...">
@@ -145,8 +163,8 @@ mark { background:#ffe066; }
 <thead>
 <tr>
 <th>No</th>
-<th id="sortDate" class="pointer">Tanggal ⬍</th>
-<th id="sortName" class="pointer">Nama Dokumen ⬍</th>
+<th class="pointer" id="sortDate">Tanggal ⬍</th>
+<th class="pointer" id="sortName">Nama Dokumen ⬍</th>
 <th>File</th>
 <th>Aksi</th>
 </tr>
@@ -154,17 +172,21 @@ mark { background:#ffe066; }
 <tbody id="tableBody"></tbody>
 </table>
 
-<div class="d-flex justify-content-between align-items-center">
+<!-- PAGINATION -->
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
   <select id="rowsPerPage" class="form-select w-auto">
     <option>10</option>
     <option>25</option>
     <option>50</option>
     <option>All</option>
   </select>
-  <ul class="pagination mb-0" id="pagination"></ul>
+
+  <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
 </div>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 const SHEET_ID="1Srk6aObn5XtkzTnl-VNvjG6x6mDdqS4ryrA_YsRHn18";
@@ -174,63 +196,71 @@ let data=[], filtered=[];
 let currentPage=1;
 let sortField="date", sortAsc=false;
 
-/* FIX DATE */
 function formatDate(val){
   if(!val) return "";
-
-  if(typeof val==="object"){
-    return new Date(val).toLocaleDateString("id-ID");
-  }
-
+  
+  // Format dari Google Sheets: Date(2025,1,15) -> 15/02/2025
   if(typeof val==="string" && val.includes("Date(")){
     const m = val.match(/Date\((\d+),(\d+),(\d+)\)/);
     if(m){
-      return new Date(m[1], m[2], m[3]).toLocaleDateString("id-ID");
+      const year = parseInt(m[1]);
+      const month = parseInt(m[2]) + 1; // Google Sheets: 0 = Januari
+      const day = parseInt(m[3]);
+      return `${day.toString().padStart(2,'0')}/${month.toString().padStart(2,'0')}/${year}`;
     }
   }
-
-  let d = new Date(val);
-  return !isNaN(d) ? d.toLocaleDateString("id-ID") : val;
-}
-
-function parseDate(d){
-  if(!d) return new Date(0);
-  let p=d.split("/");
-  return p.length===3 ? new Date(p[2],p[1]-1,p[0]) : new Date(d);
+  
+  // Fallback: coba parse tanggal biasa
+  try {
+    const d = new Date(val);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString("id-ID", {day: '2-digit', month: '2-digit', year: 'numeric'});
+    }
+  } catch {}
+  
+  return val; // kembalikan asli jika gagal
 }
 
 function loadData(){
-  let s=document.createElement("script");
+  const s=document.createElement("script");
   s.src=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:cb`;
   document.body.appendChild(s);
 }
 
 function cb(res){
-  let cols=res.table.cols.map(c=>c.label.toLowerCase());
+  try{
+    const cols=res.table.cols.map(c=>c.label.toLowerCase());
+    const rows=res.table.rows;
 
-  data=res.table.rows.map(r=>{
-    let obj={};
-    cols.forEach((c,i)=>obj[c]=r.c[i]?.v||"");
+    data = rows.map(r=>{
+      const obj={};
+      cols.forEach((col,i)=> obj[col]=r.c[i]?.v || "");
 
-    return {
-      date:formatDate(obj.tanggal),
-      act:obj.aktivitas,
-      email:obj.email?.toLowerCase(),
-      fileUrl:obj.fileurl
-    };
-  }).filter(x=>x.email===EMAIL);
+      return {
+        id: obj.id,
+        date: formatDate(obj.tanggal), // sekarang format DD/MM/YYYY
+        act: obj.aktivitas,
+        email: obj.email?.toLowerCase().trim(),
+        fileUrl: obj.fileurl
+      };
+    }).filter(x=>x.email===EMAIL);
 
-  statusBadge.className="badge bg-success";
-  statusBadge.innerText="Live";
+    statusBadge.className="badge bg-success";
+    statusBadge.innerText="Live";
+
+  }catch(e){
+    console.error("Gagal memuat data:", e);
+    data=[];
+    statusBadge.className="badge bg-danger";
+    statusBadge.innerText="Error";
+  }
 
   applyFilter();
 }
 
 function applyFilter(){
-  currentPage=1;
-
-  let q=searchInput.value.toLowerCase();
-  let f=filterFile.value;
+  const q=searchInput.value.toLowerCase();
+  const f=filterFile.value;
 
   filtered=data.filter(d=>{
     let ok=d.act.toLowerCase().includes(q);
@@ -242,107 +272,143 @@ function applyFilter(){
   sortData();
 }
 
+function parseDate(d){
+  if (!d || typeof d !== 'string') return new Date(0);
+  const parts = d.split('/');
+  if (parts.length === 3) {
+    return new Date(parts[2], parts[1]-1, parts[0]);
+  }
+  return new Date(0);
+}
+
 function sortData(){
   filtered.sort((a,b)=>{
-    let r = sortField==="date"
-      ? parseDate(a.date)-parseDate(b.date)
-      : a.act.localeCompare(b.act);
-
+    let r;
+    if (sortField === "date") {
+      r = parseDate(a.date) - parseDate(b.date);
+    } else {
+      r = (a.act || "").localeCompare(b.act || "");
+    }
     return sortAsc ? r : -r;
   });
   render();
 }
 
 function render(){
-  let perPage = rowsPerPage.value==="All" ? filtered.length || 1 : parseInt(rowsPerPage.value);
-  let totalPages = Math.ceil(filtered.length/perPage) || 1;
+  let perPage = rowsPerPage.value==="All" ? filtered.length : parseInt(rowsPerPage.value);
+  let start = (currentPage-1) * perPage;
+  let pageData = filtered.slice(start, start + perPage);
 
-  if(currentPage>totalPages) currentPage=totalPages;
-
-  let start=(currentPage-1)*perPage;
-  let pageData=filtered.slice(start,start+perPage);
-
-  tableBody.innerHTML="";
-
-  if(pageData.length===0){
-    tableBody.innerHTML='<tr><td colspan="5" class="text-center">Tidak ada data</td></tr>';
-  }
+  tableBody.innerHTML = "";
 
   pageData.forEach((d,i)=>{
-    tableBody.innerHTML+=`
+    tableBody.innerHTML += `
 <tr>
-<td>${start+i+1}</td>
-<td>${d.date}</td>
-<td>${highlight(d.act)}</td>
-<td>${d.fileUrl?'<span class="badge bg-success">PDF</span>':'<span class="badge bg-secondary">Tidak Ada</span>'}</td>
-<td>${d.fileUrl?`<a href="${d.fileUrl}" target="_blank" class="btn btn-sm btn-primary">Buka</a>`:'-'}</td>
+  <td>${start + i + 1}</td>
+  <td>${d.date || '-'}</td>
+  <td>${highlight(d.act)}</td>
+  <td>${d.fileUrl ? '<span class="badge bg-success">PDF</span>' : '<span class="badge bg-secondary">Tidak Ada</span>'}</td>
+  <td>${d.fileUrl ? `<a href="${d.fileUrl}" target="_blank" class="btn btn-sm btn-primary">Buka</a>` : '-'}</td>
 </tr>`;
   });
 
-  renderPagination(totalPages);
+  renderPagination(perPage);
   updateStats();
 }
 
-/* FIX PAGINATION */
-function renderPagination(total){
-  pagination.innerHTML="";
-  if(total<=1) return;
+function renderPagination(perPage){
+  const total = Math.ceil(filtered.length / perPage);
+  pagination.innerHTML = "";
 
-  let start=Math.max(1,currentPage-2);
-  let end=Math.min(total,start+4);
-
-  if(end-start<4) start=Math.max(1,end-4);
-
-  if(currentPage>1){
-    pagination.innerHTML+=`<li class="page-item"><a class="page-link" onclick="goPage(1)">«</a></li>`;
+  // Jika hanya 1 halaman, sembunyikan pagination
+  if (total <= 1) {
+    pagination.innerHTML = "";
+    return;
   }
 
-  if(start>1){
-    pagination.innerHTML+=`<li class="page-item disabled"><span class="page-link">...</span></li>`;
+  // Batasi jumlah halaman yang ditampilkan (misal max 5)
+  const maxPages = 5;
+  let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
+  let endPage = Math.min(total, startPage + maxPages - 1);
+  
+  if (endPage - startPage + 1 < maxPages) {
+    startPage = Math.max(1, endPage - maxPages + 1);
   }
 
-  for(let i=start;i<=end;i++){
-    pagination.innerHTML+=`
-<li class="page-item ${i===currentPage?'active':''}">
-<a class="page-link" onclick="goPage(${i})">${i}</a>
-</li>`;
+  // Tombol Previous
+  pagination.innerHTML += `
+    <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+      <a class="page-link" href="#" onclick="goPage(${currentPage-1}); return false;">«</a>
+    </li>`;
+
+  // Halaman-halaman
+  for(let i = startPage; i <= endPage; i++){
+    pagination.innerHTML += `
+      <li class="page-item ${i === currentPage ? 'active' : ''}">
+        <a class="page-link" href="#" onclick="goPage(${i}); return false;">${i}</a>
+      </li>`;
   }
 
-  if(end<total){
-    pagination.innerHTML+=`<li class="page-item disabled"><span class="page-link">...</span></li>`;
-  }
-
-  if(currentPage<total){
-    pagination.innerHTML+=`<li class="page-item"><a class="page-link" onclick="goPage(${total})">»</a></li>`;
-  }
+  // Tombol Next
+  pagination.innerHTML += `
+    <li class="page-item ${currentPage === total ? 'disabled' : ''}">
+      <a class="page-link" href="#" onclick="goPage(${currentPage+1}); return false;">»</a>
+    </li>`;
 }
 
-function goPage(p){ currentPage=p; render(); }
+function goPage(p){
+  if (p < 1) p = 1;
+  let perPage = rowsPerPage.value === "All" ? filtered.length : parseInt(rowsPerPage.value);
+  let total = Math.ceil(filtered.length / perPage);
+  if (p > total) p = total;
+  currentPage = p;
+  render();
+}
 
 function updateStats(){
-  statTotal.innerText=filtered.length;
-  statFile.innerText=filtered.filter(x=>x.fileUrl).length;
+  statTotal.innerText = filtered.length;
+  statFile.innerText = filtered.filter(x => x.fileUrl).length;
 
-  let years=filtered.map(x=>parseDate(x.date).getFullYear()).filter(x=>!isNaN(x));
-  statYear.innerText=years.length ? Math.max(...years) : "-";
+  // Tahun terbaru
+  if (filtered.length === 0) {
+    statYear.innerText = "-";
+    return;
+  }
+  
+  const years = filtered
+    .map(x => parseDate(x.date).getFullYear())
+    .filter(y => !isNaN(y));
+  
+  if (years.length === 0) {
+    statYear.innerText = "-";
+  } else {
+    statYear.innerText = Math.max(...years);
+  }
 }
 
 function highlight(text){
-  let q=searchInput.value;
-  if(!q) return text;
-  return text.replace(new RegExp(q,'gi'),m=>`<mark>${m}</mark>`);
+  const q = searchInput.value;
+  if (!q || !text) return text;
+  
+  // Escape regex special characters
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(escaped, 'gi');
+  
+  return text.replace(regex, m => `<mark>${m}</mark>`);
 }
 
-searchInput.oninput=applyFilter;
-filterFile.onchange=applyFilter;
-rowsPerPage.onchange=()=>{currentPage=1;render();}
+// Event listeners
+searchInput.oninput = () => { currentPage = 1; applyFilter(); };
+filterFile.onchange = applyFilter;
+rowsPerPage.onchange = () => { currentPage = 1; render(); };
 
-sortDate.onclick=()=>{sortField="date";sortAsc=!sortAsc;sortData();}
-sortName.onclick=()=>{sortField="act";sortAsc=!sortAsc;sortData();}
+sortDate.onclick = () => { sortField = "date"; sortAsc = !sortAsc; sortData(); };
+sortName.onclick = () => { sortField = "act"; sortAsc = !sortAsc; sortData(); };
 
-clearSearch.onclick=()=>{searchInput.value="";applyFilter();}
-refreshBtn.onclick=()=>location.reload();
+clearSearch.onclick = () => { searchInput.value = ""; applyFilter(); };
+refreshBtn.onclick = () => location.reload();
 
+// Initial load
 loadData();
 </script>
 
