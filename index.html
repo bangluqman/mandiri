@@ -26,17 +26,19 @@ body { background:#f4f6fb; }
 
 .pointer { cursor:pointer; }
 mark { background:#ffe066; }
+
+/* FIX pagination */
+.pagination {
+  flex-wrap: wrap;
+  max-width: 100%;
+}
 </style>
 </head>
 
 <body>
 
-<!-- NAVBAR -->
 <nav class="navbar navbar-dark bg-primary px-3 shadow">
-  <span class="navbar-brand fw-bold">
-    📂 MANDIRI
-  </span>
-
+  <span class="navbar-brand fw-bold">📂 MANDIRI</span>
   <div>
     <span id="statusBadge" class="badge bg-warning">Statis</span>
     <button id="refreshBtn" class="btn btn-light btn-sm ms-2">
@@ -45,7 +47,6 @@ mark { background:#ffe066; }
   </div>
 </nav>
 
-<!-- HERO -->
 <div class="hero text-center">
   <h2 class="fw-bold">Manajemen Dokumen Digital Terintegrasi</h2>
 
@@ -76,7 +77,6 @@ mark { background:#ffe066; }
 
 <div class="container mt-4">
 
-<!-- SEARCH -->
 <div class="input-group mb-3">
   <span class="input-group-text"><i class="bi bi-search"></i></span>
   <input id="searchInput" class="form-control" placeholder="Cari dokumen...">
@@ -93,8 +93,8 @@ mark { background:#ffe066; }
 <thead>
 <tr>
 <th>No</th>
-<th class="pointer" id="sortDate">Tanggal ⬍</th>
-<th class="pointer" id="sortName">Nama Dokumen ⬍</th>
+<th id="sortDate" class="pointer">Tanggal ⬍</th>
+<th id="sortName" class="pointer">Nama Dokumen ⬍</th>
 <th>File</th>
 <th>Aksi</th>
 </tr>
@@ -102,7 +102,6 @@ mark { background:#ffe066; }
 <tbody id="tableBody"></tbody>
 </table>
 
-<!-- PAGINATION -->
 <div class="d-flex justify-content-between align-items-center">
   <select id="rowsPerPage" class="form-select w-auto">
     <option>10</option>
@@ -110,7 +109,6 @@ mark { background:#ffe066; }
     <option>50</option>
     <option>All</option>
   </select>
-
   <ul class="pagination mb-0" id="pagination"></ul>
 </div>
 
@@ -124,63 +122,63 @@ let data=[], filtered=[];
 let currentPage=1;
 let sortField="date", sortAsc=false;
 
-/* FORMAT TANGGAL (FIX UTAMA) */
+/* FIX DATE */
 function formatDate(val){
   if(!val) return "";
 
-  // format Date(2023,10,2)
+  if(typeof val==="object"){
+    return new Date(val).toLocaleDateString("id-ID");
+  }
+
   if(typeof val==="string" && val.includes("Date(")){
     const m = val.match(/Date\((\d+),(\d+),(\d+)\)/);
     if(m){
-      const d = new Date(m[1], m[2], m[3]);
-      return d.toLocaleDateString("id-ID");
+      return new Date(m[1], m[2], m[3]).toLocaleDateString("id-ID");
     }
   }
 
-  // jika sudah string normal
-  return val;
+  let d = new Date(val);
+  return !isNaN(d) ? d.toLocaleDateString("id-ID") : val;
 }
 
-/* LOAD */
+function parseDate(d){
+  if(!d) return new Date(0);
+  let p=d.split("/");
+  return p.length===3 ? new Date(p[2],p[1]-1,p[0]) : new Date(d);
+}
+
 function loadData(){
-  const s=document.createElement("script");
+  let s=document.createElement("script");
   s.src=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:cb`;
   document.body.appendChild(s);
 }
 
-/* CALLBACK */
 function cb(res){
-  try{
-    const cols=res.table.cols.map(c=>c.label.toLowerCase());
-    const rows=res.table.rows;
+  let cols=res.table.cols.map(c=>c.label.toLowerCase());
 
-    data = rows.map(r=>{
-      const obj={};
-      cols.forEach((col,i)=> obj[col]=r.c[i]?.v || "");
+  data=res.table.rows.map(r=>{
+    let obj={};
+    cols.forEach((c,i)=>obj[c]=r.c[i]?.v||"");
 
-      return {
-        id: obj.id,
-        date: formatDate(obj.tanggal),
-        act: obj.aktivitas,
-        email: obj.email?.toLowerCase().trim(),
-        fileUrl: obj.fileurl
-      };
-    }).filter(x=>x.email===EMAIL);
+    return {
+      date:formatDate(obj.tanggal),
+      act:obj.aktivitas,
+      email:obj.email?.toLowerCase(),
+      fileUrl:obj.fileurl
+    };
+  }).filter(x=>x.email===EMAIL);
 
-    statusBadge.className="badge bg-success";
-    statusBadge.innerText="Live";
-
-  }catch{
-    data=[];
-  }
+  statusBadge.className="badge bg-success";
+  statusBadge.innerText="Live";
 
   applyFilter();
 }
 
-/* FILTER */
 function applyFilter(){
-  const q=searchInput.value.toLowerCase();
-  const f=filterFile.value;
+  currentPage=1;
+
+  let q=searchInput.value.toLowerCase();
+  let f=filterFile.value;
 
   filtered=data.filter(d=>{
     let ok=d.act.toLowerCase().includes(q);
@@ -192,29 +190,31 @@ function applyFilter(){
   sortData();
 }
 
-/* SORT */
-function parseDate(d){
-  const parts=d.split("/");
-  return new Date(parts[2],parts[1]-1,parts[0]);
-}
-
 function sortData(){
   filtered.sort((a,b)=>{
     let r = sortField==="date"
       ? parseDate(a.date)-parseDate(b.date)
       : a.act.localeCompare(b.act);
-    return sortAsc?r:-r;
+
+    return sortAsc ? r : -r;
   });
   render();
 }
 
-/* RENDER */
 function render(){
-  let perPage = rowsPerPage.value==="All"?filtered.length:parseInt(rowsPerPage.value);
-  let start = (currentPage-1)*perPage;
-  let pageData = filtered.slice(start,start+perPage);
+  let perPage = rowsPerPage.value==="All" ? filtered.length || 1 : parseInt(rowsPerPage.value);
+  let totalPages = Math.ceil(filtered.length/perPage) || 1;
+
+  if(currentPage>totalPages) currentPage=totalPages;
+
+  let start=(currentPage-1)*perPage;
+  let pageData=filtered.slice(start,start+perPage);
 
   tableBody.innerHTML="";
+
+  if(pageData.length===0){
+    tableBody.innerHTML='<tr><td colspan="5" class="text-center">Tidak ada data</td></tr>';
+  }
 
   pageData.forEach((d,i)=>{
     tableBody.innerHTML+=`
@@ -223,43 +223,65 @@ function render(){
 <td>${d.date}</td>
 <td>${highlight(d.act)}</td>
 <td>${d.fileUrl?'<span class="badge bg-success">PDF</span>':'<span class="badge bg-secondary">Tidak Ada</span>'}</td>
-<td><a href="${d.fileUrl}" target="_blank" class="btn btn-sm btn-primary">Buka</a></td>
+<td>${d.fileUrl?`<a href="${d.fileUrl}" target="_blank" class="btn btn-sm btn-primary">Buka</a>`:'-'}</td>
 </tr>`;
   });
 
-  renderPagination(perPage);
+  renderPagination(totalPages);
   updateStats();
 }
 
-/* PAGINATION */
-function renderPagination(perPage){
-  const total=Math.ceil(filtered.length/perPage);
+/* FIX PAGINATION */
+function renderPagination(total){
   pagination.innerHTML="";
-  for(let i=1;i<=total;i++){
+  if(total<=1) return;
+
+  let start=Math.max(1,currentPage-2);
+  let end=Math.min(total,start+4);
+
+  if(end-start<4) start=Math.max(1,end-4);
+
+  if(currentPage>1){
+    pagination.innerHTML+=`<li class="page-item"><a class="page-link" onclick="goPage(1)">«</a></li>`;
+  }
+
+  if(start>1){
+    pagination.innerHTML+=`<li class="page-item disabled"><span class="page-link">...</span></li>`;
+  }
+
+  for(let i=start;i<=end;i++){
     pagination.innerHTML+=`
 <li class="page-item ${i===currentPage?'active':''}">
-<a class="page-link" href="#" onclick="goPage(${i})">${i}</a>
+<a class="page-link" onclick="goPage(${i})">${i}</a>
 </li>`;
   }
+
+  if(end<total){
+    pagination.innerHTML+=`<li class="page-item disabled"><span class="page-link">...</span></li>`;
+  }
+
+  if(currentPage<total){
+    pagination.innerHTML+=`<li class="page-item"><a class="page-link" onclick="goPage(${total})">»</a></li>`;
+  }
 }
+
 function goPage(p){ currentPage=p; render(); }
 
-/* STATS */
 function updateStats(){
   statTotal.innerText=filtered.length;
   statFile.innerText=filtered.filter(x=>x.fileUrl).length;
-  statYear.innerText=Math.max(...filtered.map(x=>parseDate(x.date).getFullYear()));
+
+  let years=filtered.map(x=>parseDate(x.date).getFullYear()).filter(x=>!isNaN(x));
+  statYear.innerText=years.length ? Math.max(...years) : "-";
 }
 
-/* SEARCH */
 function highlight(text){
-  const q=searchInput.value;
+  let q=searchInput.value;
   if(!q) return text;
   return text.replace(new RegExp(q,'gi'),m=>`<mark>${m}</mark>`);
 }
 
-/* EVENTS */
-searchInput.oninput=()=>{currentPage=1;applyFilter();}
+searchInput.oninput=applyFilter;
 filterFile.onchange=applyFilter;
 rowsPerPage.onchange=()=>{currentPage=1;render();}
 
@@ -269,7 +291,6 @@ sortName.onclick=()=>{sortField="act";sortAsc=!sortAsc;sortData();}
 clearSearch.onclick=()=>{searchInput.value="";applyFilter();}
 refreshBtn.onclick=()=>location.reload();
 
-/* INIT */
 loadData();
 </script>
 
